@@ -8,6 +8,8 @@ package formularios;
 import conexionSQL.conexionSQL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.swing.JOptionPane;
 
 /**
@@ -25,6 +27,9 @@ public class sistema extends javax.swing.JFrame {
         this.setLocationRelativeTo(null);
         this.getContentPane().setBackground(getBackground());
         //mostrarDatos();
+        
+        txtFecha.setText(fechaActual());
+        
     }
 
     /**
@@ -242,6 +247,14 @@ public class sistema extends javax.swing.JFrame {
     private void txtBuscarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtBuscarActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_txtBuscarActionPerformed
+    
+    public static String fechaActual(){
+    
+        Date fecha=new Date();
+        SimpleDateFormat formatoFecha=new SimpleDateFormat("dd/MM/YYYY");
+        
+        return formatoFecha.format(fecha);
+    }
     
     public void insertarDatos(){
     
