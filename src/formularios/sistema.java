@@ -8,9 +8,12 @@ package formularios;
 import conexionSQL.conexionSQL;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -29,6 +32,7 @@ public class sistema extends javax.swing.JFrame {
         //mostrarDatos();
         
         txtFecha.setText(fechaActual());
+        mostrarDatos();
         
     }
 
@@ -66,7 +70,7 @@ public class sistema extends javax.swing.JFrame {
         tablaFactura = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setBackground(new java.awt.Color(204, 255, 255));
+        setBackground(new java.awt.Color(204, 204, 204));
 
         jPanel1.setBackground(new java.awt.Color(153, 204, 255));
 
@@ -103,8 +107,18 @@ public class sistema extends javax.swing.JFrame {
         });
 
         btnEliminar.setText("Eliminar");
+        btnEliminar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnEliminarActionPerformed(evt);
+            }
+        });
 
         btnActualizar.setText("Actualizar");
+        btnActualizar.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnActualizarActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -208,6 +222,11 @@ public class sistema extends javax.swing.JFrame {
 
             }
         ));
+        tablaFactura.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tablaFacturaMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tablaFactura);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -256,6 +275,104 @@ public class sistema extends javax.swing.JFrame {
         return formatoFecha.format(fecha);
     }
     
+    public void actualizarDatos(){
+    
+        try{
+            String SQL="update factura set fecha=?, descripcion=?, cantidad=?, punitario=?, importe=?, tipo=?, estado=? where id=?";
+            int filaSeleccionada=tablaFactura.getSelectedRow();
+            String dao=(String)tablaFactura.getValueAt(filaSeleccionada, 0);
+            
+            PreparedStatement pst=con.prepareStatement(SQL); 
+            pst.setString(1, txtFecha.getText());
+            pst.setString(2, txtDescripcion.getText());
+            pst.setDouble(3, Double.parseDouble(txtCantidad.getText()));
+            pst.setDouble(4, Double.parseDouble(txtPunitario.getText()));
+            pst.setDouble(5, Double.parseDouble(txtImporte.getText()));
+            
+            int seleccionado=cbEstado.getSelectedIndex();
+            pst.setString(6, cbEstado.getItemAt(seleccionado));
+            
+            int seleccionado1=cbTipo.getSelectedIndex();
+            pst.setString(7, cbTipo.getItemAt(seleccionado1));
+            
+            pst.setString(8, dao);
+            pst.execute();
+            
+            JOptionPane.showMessageDialog(null, "Actualización Exitosa");
+            
+        }catch (Exception e){
+            
+            JOptionPane.showMessageDialog(null, "Error de Actualización " +e.getMessage());
+
+        }
+    
+    }
+    
+    public void mostrarDatos(){
+        String [] titulos={"ID","Fecha","Descripcion","Cantidad","Punitario","Importe","Tipo","Estado"};
+        String [] registros=new String[8];
+        
+        DefaultTableModel modelo = new DefaultTableModel(null,titulos);
+        
+        String SQL = " select * from factura ";
+        
+        try {
+            Statement get=con.createStatement();
+            ResultSet dato=get.executeQuery(SQL);
+            while(dato.next()){
+                           
+                registros[0]=dato.getString("id");
+                registros[1]=dato.getString("fecha");
+                registros[2]=dato.getString("descripcion");
+                registros[3]=dato.getString("cantidad");
+                registros[4]=dato.getString("punitario");
+                registros[5]=dato.getString("importe");
+                registros[6]=dato.getString("tipo");
+                registros[7]=dato.getString("estado");
+                
+                modelo.addRow(registros);
+                
+            }
+                    tablaFactura.setModel(modelo);
+        } catch (Exception e) {
+            
+            JOptionPane.showMessageDialog(null, "Error al Mostrar Datos" +e.getMessage());
+            
+        }
+        
+    }
+    
+    public void eliminarRegistro(){
+    
+        int filaSeleccionda=tablaFactura.getSelectedRow();
+        
+        try {
+            String SQL="delete from factura where id="+tablaFactura.getValueAt(filaSeleccionda,0);
+            Statement delete=con.createStatement();
+            
+            int n=delete.executeUpdate(SQL);
+            
+            if (n >= 0) {
+                JOptionPane.showMessageDialog(null, "Registro eliminado pe mi King");
+            }
+            
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error al eliminar Datos" +e.getMessage());
+        }
+        
+    }
+    
+    public void limpiarCajasnew(){
+    
+        txtFecha.setText("");
+        txtDescripcion.setText("");
+        txtCantidad.setText("");
+        txtImporte.setText("");
+        cbEstado.setSelectedItem(null);
+        cbTipo.setSelectedItem(null);
+        
+    }
+    
     public void insertarDatos(){
     
         try{
@@ -287,12 +404,39 @@ public class sistema extends javax.swing.JFrame {
     }
     
     private void btnNuevoActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnNuevoActionPerformed
-        // TODO add your handling code here:
+        limpiarCajasnew();
     }//GEN-LAST:event_btnNuevoActionPerformed
 
     private void btnGuardarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnGuardarActionPerformed
         insertarDatos();
+        limpiarCajasnew();
+        mostrarDatos();
     }//GEN-LAST:event_btnGuardarActionPerformed
+
+    private void btnEliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnEliminarActionPerformed
+        eliminarRegistro();
+        limpiarCajasnew();
+        mostrarDatos();
+    }//GEN-LAST:event_btnEliminarActionPerformed
+
+    private void tablaFacturaMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tablaFacturaMouseClicked
+        
+        int filaSeleccionada=tablaFactura.rowAtPoint(evt.getPoint());
+        txtFecha.setText(tablaFactura.getValueAt(filaSeleccionada, 1).toString());
+        txtDescripcion.setText(tablaFactura.getValueAt(filaSeleccionada, 2).toString());
+        txtCantidad.setText(tablaFactura.getValueAt(filaSeleccionada, 3).toString());
+        txtPunitario.setText(tablaFactura.getValueAt(filaSeleccionada, 4).toString());
+        txtImporte.setText(tablaFactura.getValueAt(filaSeleccionada, 5).toString());
+        cbEstado.setSelectedItem(tablaFactura.getValueAt(filaSeleccionada, 6));
+        cbTipo.setSelectedItem(tablaFactura.getValueAt(filaSeleccionada, 7));
+        
+    }//GEN-LAST:event_tablaFacturaMouseClicked
+
+    private void btnActualizarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnActualizarActionPerformed
+        actualizarDatos();
+        limpiarCajasnew();
+        mostrarDatos();
+    }//GEN-LAST:event_btnActualizarActionPerformed
 
     /**
      * @param args the command line arguments
