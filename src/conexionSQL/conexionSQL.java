@@ -22,7 +22,7 @@ public class conexionSQL {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             conectar=DriverManager.getConnection("jdbc:mysql://localhost/pescados","root","");
-            JOptionPane.showMessageDialog(null, "Conexion Exitosa");
+            JOptionPane.showMessageDialog(null, "Conexion Exitosa pe mi King");
             
         }catch (Exception e){
             JOptionPane.showMessageDialog(null, "Error de conexion " + e.getMessage());
